@@ -1,12 +1,14 @@
 import {
   Component,
   Input,
+  OnInit,
+  Signal,
+  computed,
   inject,
-  numberAttribute,
+  input,
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Router } from "@angular/router";
-import { Observable, of } from "rxjs";
 import { ProductFormComponent } from "../../components/product-form/product-form.component";
 import { ProductService } from "../../../../services/product.service";
 import { Product } from "../../../../models/product.model";
@@ -15,29 +17,39 @@ import { Product } from "../../../../models/product.model";
   selector: "app-product-form-container",
   imports: [CommonModule, ProductFormComponent],
   template: `
-    <app-product-form
-      [product]="product$ | async"
-      [isSubmitting]="isSubmitting"
-      (save)="onSave($event)"
-      (cancel)="onCancel()"
-    >
-    </app-product-form>
+    @if (loading()) {
+      <div class="loading"></div>
+    } @else {
+      <app-product-form
+        [product]="product()"
+        [isSubmitting]="isSubmitting"
+        (save)="onSave($event)"
+        (cancel)="onCancel()"
+      >
+      </app-product-form>
+    }
   `,
 })
-export class ProductFormContainerComponent {
+export class ProductFormContainerComponent implements OnInit {
   private router = inject(Router);
   private productService = inject(ProductService);
 
-  product$!: Observable<Product | null>;
+  product: Signal<Product | null> = this.productService.selectedProduct;
+  loading: Signal<boolean> = this.productService.loading;
   isSubmitting = false;
   private productId: number | null = null;
 
-  @Input({ transform: numberAttribute })
-  set id(productId: number) {
-    this.productId = productId ? Number(productId) : null;
-    this.product$ = this.productId
-      ? this.productService.getProduct(this.productId)
-      : of(null);
+  readonly id = input<number>()
+
+  ngOnInit() {
+    this.productId = this.id() ?? null;
+
+    this.productService.clearSelectedProduct();
+
+    // Only fetch if we are in edit mode (productId is set)
+    if(this.productId) {
+      this.productService.getProduct(this.productId)
+    }
   }
 
   onSave(formData: Partial<Product>): void {

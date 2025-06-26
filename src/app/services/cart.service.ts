@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Signal, signal, WritableSignal } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { CartItem } from '../models/cart-item.model';
 
@@ -6,43 +6,43 @@ import { CartItem } from '../models/cart-item.model';
   providedIn: 'root'
 })
 export class CartService {
-  private cartItems = new BehaviorSubject<CartItem[]>([]);
+ // private cartItems = new BehaviorSubject<CartItem[]>([]);
+ private cartItems = signal<CartItem[]>([]);
 
-  getCartItems(): Observable<CartItem[]> {
-    return this.cartItems.asObservable();
+  getCartItems(): Signal<CartItem[]> {
+    return this.cartItems.asReadonly();
   }
 
-  addToCart(productId: number): void {
-    const currentItems = this.cartItems.value;
-    const existingItem = currentItems.find(item => item.product === productId);
 
-    if (existingItem) {
-      const updatedItems = currentItems.map(item =>
-        item.product === productId
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      );
-      this.cartItems.next(updatedItems);
-    } else {
-      this.cartItems.next([...currentItems, { product: productId, quantity: 1 }]);
-    }
+  addToCart(productId: number): void {
+    this.cartItems.update(items => {
+      const existingItem = items.find(item => item.product === productId);
+      if (existingItem) {
+        return items.map(item =>
+          item.product === productId
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...items, { product: productId, quantity: 1 }];
+    });
   }
 
   removeFromCart(productId: number): void {
-    const currentItems = this.cartItems.value;
-    const updatedItems = currentItems.filter(item => item.product !== productId);
-    this.cartItems.next(updatedItems);
+    this.cartItems.update(items =>
+      items.filter(item => item.product !== productId)
+    );
   }
 
   updateQuantity(productId: number, quantity: number): void {
-    const currentItems = this.cartItems.value;
-    const updatedItems = currentItems.map(item =>
-      item.product === productId ? { ...item, quantity } : item
+    this.cartItems.update(items =>
+      items.map(item =>
+        item.product === productId ? { ...item, quantity } : item
+      )
     );
-    this.cartItems.next(updatedItems);
   }
 
   clearCart(): void {
-    this.cartItems.next([]);
+    this.cartItems.set([]);
   }
 }
