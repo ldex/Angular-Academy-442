@@ -1,4 +1,4 @@
-import { Component, computed, Input, input, output, signal } from '@angular/core';
+import { Component, computed, input, model, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -18,9 +18,9 @@ export class ProductListComponent {
   readonly addToCart = output<number>();
   readonly refresh = output<void>();
 
-  searchQuery = signal('');
-  selectedCategory = signal('');
-  sortBy = signal('name');
+  selectedCategory = model('');
+  searchQuery = model('');
+  sortBy = model('name');
 
   categories = computed(() =>
     [...new Set(this.products().map(p => p.category))]
@@ -63,18 +63,6 @@ export class ProductListComponent {
 
     return filtered;
   });
-
-  updateSearchQuery(query: string): void {
-    this.searchQuery.set(query);
-  }
-
-  updateCategory(category: string): void {
-    this.selectedCategory.set(category);
-  }
-
-  updateSortBy(sortOption: string): void {
-    this.sortBy.set(sortOption);
-  }
 
   onAddToCart(productId: number): void {
     this.addToCart.emit(productId);
