@@ -69,7 +69,6 @@ export class ProductListComponent {
   }
 
   onRefresh(): void {
-    // TODO: The 'emit' function requires a mandatory void argument
     this.refresh.emit();
   }
 }
