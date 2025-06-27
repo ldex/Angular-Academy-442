@@ -12,6 +12,7 @@ import { Router } from "@angular/router";
 import { ProductFormComponent } from "../../components/product-form/product-form.component";
 import { ProductService } from "../../../../services/product.service";
 import { Product } from "../../../../models/product.model";
+import { ProductStore } from "../../../../store/product.store";
 
 @Component({
   selector: "app-product-form-container",
@@ -32,10 +33,12 @@ import { Product } from "../../../../models/product.model";
 })
 export class ProductFormContainerComponent implements OnInit {
   private router = inject(Router);
-  private productService = inject(ProductService);
+ // private productService = inject(ProductService);
 
-  product: Signal<Product | null> = this.productService.selectedProduct;
-  loading: Signal<boolean> = this.productService.loading;
+ private store = inject(ProductStore)
+
+  product: Signal<Product | null> = this.store.selectedProduct;
+  loading: Signal<boolean> = this.store.loading;
   isSubmitting = false;
   private productId: number | null = null;
 
@@ -44,11 +47,11 @@ export class ProductFormContainerComponent implements OnInit {
   ngOnInit() {
     this.productId = this.id() ?? null;
 
-    this.productService.clearSelectedProduct();
+    this.store.clearSelectedProduct();
 
     // Only fetch if we are in edit mode (productId is set)
     if(this.productId) {
-      this.productService.getProduct(this.productId)
+      this.store.loadProduct(this.productId)
     }
   }
 
@@ -60,15 +63,7 @@ export class ProductFormContainerComponent implements OnInit {
     this.isSubmitting = true;
 
     if (this.productId) {
-      this.productService.updateProduct(this.productId, formData).subscribe({
-        next: () => {
-          this.router.navigate(["/products"]);
-        },
-        error: (error) => {
-          console.error("Error updating product:", error);
-          this.isSubmitting = false;
-        },
-      });
+      this.store.updateProduct({id: this.productId, product: formData})
     } else {
       const newProduct = {
         title: formData.title!,
@@ -79,15 +74,7 @@ export class ProductFormContainerComponent implements OnInit {
         rating: { rate: 0, count: 0 },
       };
 
-      this.productService.createProduct(newProduct).subscribe({
-        next: () => {
-          this.router.navigate(["/products"]);
-        },
-        error: (error) => {
-          console.error("Error creating product:", error);
-          this.isSubmitting = false;
-        },
-      });
+      this.store.createProduct(newProduct)
     }
   }
 

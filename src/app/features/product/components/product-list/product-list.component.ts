@@ -1,4 +1,4 @@
-import { Component, computed, input, model, output, signal } from '@angular/core';
+import { Component, computed, input, linkedSignal, model, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -15,12 +15,21 @@ export class ProductListComponent {
   readonly error = input.required<string | null>();
   readonly loading = input(false);
   readonly isAuthenticated = input(false);
+
   readonly addToCart = output<number>();
   readonly refresh = output<void>();
 
   selectedCategory = model('');
-  searchQuery = model('');
-  sortBy = model('name');
+  //searchQuery = model('');
+  searchQuery = linkedSignal({
+    source: this.selectedCategory,
+    computation: () => ""
+  })
+  //sortBy = model('name');
+  sortBy = linkedSignal({
+    source: this.searchQuery,
+    computation: () => "name"
+  });
 
   categories = computed(() =>
     [...new Set(this.products().map(p => p.category))]
