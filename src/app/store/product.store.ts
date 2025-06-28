@@ -7,7 +7,6 @@ import {
     withHooks,
     withProps,
   } from "@ngrx/signals";
-  import { computed } from "@angular/core";
   import { Product } from "../models/product.model";
   import { inject } from "@angular/core";
   import { rxMethod } from "@ngrx/signals/rxjs-interop";

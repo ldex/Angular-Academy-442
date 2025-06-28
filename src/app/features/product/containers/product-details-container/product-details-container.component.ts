@@ -1,14 +1,11 @@
-import { Component, Input, numberAttribute, inject, Signal, computed, input, OnInit } from '@angular/core';
+import { Component, inject, Signal, computed, input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { catchError, EMPTY, finalize, Observable } from 'rxjs';
 import { ProductDetailsComponent } from '../../components/product-details/product-details.component';
-import { ProductService } from '../../../../services/product.service';
-import { CartService } from '../../../../services/cart.service';
-import { AuthService } from '../../../../services/auth.service';
 import { Product } from '../../../../models/product.model';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ProductStore } from '../../../../store/product.store';
+import { ProductStore } from '@app/store';
+import { AuthService, CartService } from '@app/services';
 
 @Component({
   selector: 'app-product-details-container',
@@ -26,10 +23,8 @@ import { ProductStore } from '../../../../store/product.store';
 })
 export class ProductDetailsContainerComponent implements OnInit {
   private router = inject(Router);
-  //private productService = inject(ProductService);
   private cartService = inject(CartService);
   private authService = inject(AuthService);
-
   private store = inject(ProductStore);
 
   product: Signal<Product | null> = this.store.selectedProduct;

@@ -1,18 +1,15 @@
 import {
   Component,
-  Input,
   OnInit,
   Signal,
-  computed,
   inject,
   input,
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Router } from "@angular/router";
 import { ProductFormComponent } from "../../components/product-form/product-form.component";
-import { ProductService } from "../../../../services/product.service";
 import { Product } from "../../../../models/product.model";
-import { ProductStore } from "../../../../store/product.store";
+import { ProductStore } from "@app/store";
 
 @Component({
   selector: "app-product-form-container",
@@ -33,8 +30,6 @@ import { ProductStore } from "../../../../store/product.store";
 })
 export class ProductFormContainerComponent implements OnInit {
   private router = inject(Router);
- // private productService = inject(ProductService);
-
  private store = inject(ProductStore)
 
   product: Signal<Product | null> = this.store.selectedProduct;
